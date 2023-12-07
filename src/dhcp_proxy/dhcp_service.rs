@@ -49,6 +49,19 @@ impl DhcpV4Service {
     pub fn new(nc: NetworkConfig, timeout: u32) -> Result<Self, DhcpServiceError> {
         let mut config = DhcpV4Config::new_proxy(&nc.host_iface, &nc.container_mac_addr);
         config.set_timeout(timeout);
+
+        // set hostname if hostname/containername is set
+        let dhcp_host_name = if !nc.host_name.is_empty() {
+            &nc.host_name
+        } else if !nc.container_name.is_empty() { 
+            &nc.container_name
+        } else {
+            ""
+        };
+        if !dhcp_host_name.is_empty() {
+            config.set_host_name(dhcp_host_name);
+            config.use_host_name_as_client_id();
+        };        
         let client = match DhcpV4ClientAsync::init(config, None) {
             Ok(client) => Ok(client),
             Err(err) => Err(DhcpServiceError::new(InvalidArgument, err.to_string())),

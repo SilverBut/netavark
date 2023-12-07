@@ -186,6 +186,7 @@ impl driver::NetworkDriver for Vlan<'_> {
                 &data.container_interface_name,
                 self.info.netns_path,
                 &container_vlan_mac,
+                self.info.container_name,
             )?
         } else {
             data.ipam.net_addresses.clone()
